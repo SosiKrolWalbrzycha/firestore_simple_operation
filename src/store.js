@@ -8,7 +8,9 @@ import itemsReducer from './itemsReducer';
 
 const rootReducer = combineReducers({
   // Tutaj dodajesz swoje reducery
-  items: itemsReducer,
+  orders: itemsReducer,
+  transactions: itemsReducer,
+  dailyExchangeRates: itemsReducer, 
 });
 
 const store = createStore(
