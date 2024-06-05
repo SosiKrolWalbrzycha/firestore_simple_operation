@@ -1,7 +1,5 @@
 import { createStore, applyMiddleware, combineReducers } from 'redux';
-import {thunk} from 'redux-thunk';
-import { composeWithDevTools } from 'redux-devtools-extension';
-
+import { thunk } from 'redux-thunk'; // Poprawny import
 
 // Importuj swoje reducery
 import itemsReducer from './itemsReducer';
@@ -13,11 +11,10 @@ const rootReducer = combineReducers({
   dailyExchangeRates: itemsReducer, 
 });
 
+// Tworzenie store z middleware thunk
 const store = createStore(
   rootReducer,
-  composeWithDevTools(
-  applyMiddleware(thunk)// Umożliwia korzystanie z Redux DevTools i thunk
- 
-));
+  applyMiddleware(thunk) // Użycie thunk bez composeWithDevTools
+);
 
 export default store;
