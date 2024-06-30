@@ -3,7 +3,7 @@ import { getAnalytics } from "firebase/analytics";
 import { getFirestore, connectFirestoreEmulator } from "firebase/firestore"; // Import connectFirestoreEmulator
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDEaLat4N9v0K3XeTT4RySCYNlh4LLADNs",
+  apiKey: "",
   authDomain: "appfire-4a743.firebaseapp.com",
   projectId: "appfire-4a743",
   storageBucket: "appfire-4a743.appspot.com",

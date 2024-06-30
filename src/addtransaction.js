@@ -19,30 +19,67 @@ const SubWindow = styled.div`
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
-
 	padding: 20px;
-	width: 40%;
+	width: 30%;
 	background-color: white;
 	line-height: 200%;
+
+	@media (max-width: 1400px) {
+		padding: 0px;
+		width: 30%;
+	}
+	@media (max-width: 1200px) {
+		padding: 0px;
+		width: 30%;
+	}
+	@media (max-width: 992px) {
+		padding: 0px;
+		width: 40%;
+	}
+	@media (max-width: 768px) {
+		padding: 0px;
+		width:60%;
+	}
+
+	@media (max-width: 576px) {
+		padding: 20px;
+		width: 90%;
+		
+	}
 `
 
 const ErrorMessage = styled.div`
 	color: red;
 	font-size: 12px;
-
 `
 
 const InputContainer = styled.div`
-display: flex;
-flex-direction: row;
-
+	display: flex;
+	flex-direction: row;
 `
 
 const OneCell = styled.div`
 	display: flex;
-	justify-content: space-between;
 	align-items: center;
+
+	flex-direction: column;
 `
+
+const Firstdiv = styled.div`
+	display: flex;
+	flex-direction: row;
+	width: 100%;
+	justify-content: space-between;
+`
+const Seconddiv = styled.div`
+	display: flex;
+	flex-direction: row;
+	width: 100%;
+	justify-content: end;
+	transform: translateY(-4px);
+	line-height: 1.3;
+`
+
 const SecondCell = styled.div`
 	display: flex;
 `
@@ -51,12 +88,18 @@ const NewTextInput = styled.input`
 	height: 20px;
 	width: 100px;
 	border: 2px solid black;
+	transform: translateY(2px);
 `
 const NewRadioInput = styled.input`
 	margin-left: 30px;
 	height: 20px;
 	cursor: pointer;
 	border-radius: 5px;
+	transform: translateY(2px);
+
+	@media (max-width: 576px) {
+		margin-left: 0px;
+	}
 `
 
 const NewSelect = styled.select`
@@ -64,6 +107,7 @@ const NewSelect = styled.select`
 	height: 25px;
 	width: 107px;
 	border: 2px solid black;
+	transform: translateY(2px);
 `
 
 const NewButton = styled.button`
@@ -74,20 +118,21 @@ const NewButton = styled.button`
 	border-radius: 5px;
 `
 
-const Polediv = styled.div`
-display: flex;
-flex-direction: column;
-`
-
 const AddTransactionWindow = prop => {
 	const [windowWidth, setWindowWidth] = useState(window.innerWidth * 1)
-	const [windowHeight, setWindowHeight] = useState(window.innerHeight * 0.4)
+	const [windowHeight, setWindowHeight] = useState(window.innerHeight * 0.3)
 	const [currencySuffix, setCurrencySuffix] = useState('') // Stan do przechowywania skrótu waluty
 
 	useEffect(() => {
 		const handleResize = () => {
-			setWindowWidth(window.innerWidth * 1)
-			setWindowHeight(window.innerHeight * 0.4)
+			if (windowWidth <= 900) {
+				setWindowWidth(window.innerWidth * 1)
+				setWindowHeight(window.innerHeight * 0.3)
+			} 
+			 else {
+				setWindowWidth(window.innerWidth * 1)
+				setWindowHeight(window.innerHeight * 0.3)
+			}
 		}
 		window.addEventListener('resize', handleResize)
 		return () => window.removeEventListener('resize', handleResize)
@@ -173,43 +218,46 @@ const AddTransactionWindow = prop => {
 				<h2 style={{ textAlign: 'center' }}>Dodaj nową transakcję:</h2>
 				<form onSubmit={formik.handleSubmit}>
 					<OneCell>
-						<label htmlFor='data'>Data transakcji:</label>
-						<InputContainer>
-							<NewTextInput
-								id='data'
-								name='data'
-								type='date'
-								onChange={formik.handleChange}
-								value={formik.values.data}
-								error={formik.errors.data && formik.touched.data}
-							/>
-							{formik.errors.data && formik.touched.data && <ErrorMessage>{formik.errors.data}</ErrorMessage>}
-						</InputContainer>
-					</OneCell>
-					<OneCell>
-						<label htmlFor='password'>
-							Wartość transakcji w <span>{currencySuffix}</span>:
-						</label>
-						<Polediv>
-							
+						<Firstdiv>
+							<label htmlFor='data'>Data transakcji:</label>
+							<InputContainer>
 								<NewTextInput
-									id='value'
-									name='value'
-									type='number'
+									id='data'
+									name='data'
+									type='date'
 									onChange={formik.handleChange}
-									value={formik.values.value}
-									error={formik.errors.value && formik.touched.value}
+									value={formik.values.data}
+									error={formik.errors.data && formik.touched.data}
 								/>
-								{formik.errors.value && formik.touched.value && <ErrorMessage>{formik.errors.value}</ErrorMessage>}
-								
-								</Polediv>
-								
-							
-						
+							</InputContainer>
+						</Firstdiv>
+						<Seconddiv>
+							{formik.errors.data && formik.touched.data && <ErrorMessage>{formik.errors.data}</ErrorMessage>}
+						</Seconddiv>
 					</OneCell>
 					<OneCell>
-						<label>Typ transakcji:</label>
-						<div>
+						<Firstdiv>
+							<label htmlFor='password'>
+								Wartość transakcji w <span>{currencySuffix}</span>:
+							</label>
+
+							<NewTextInput
+								id='value'
+								name='value'
+								type='number'
+								onChange={formik.handleChange}
+								value={formik.values.value}
+								error={formik.errors.value && formik.touched.value}
+							/>
+						</Firstdiv>
+						<Seconddiv>
+							{formik.errors.value && formik.touched.value && <ErrorMessage>{formik.errors.value}</ErrorMessage>}
+						</Seconddiv>
+					</OneCell>
+					<OneCell>
+						<Firstdiv>
+							<label>Typ transakcji:</label>
+
 							<label>
 								<NewRadioInput
 									type='radio'
@@ -218,7 +266,7 @@ const AddTransactionWindow = prop => {
 									checked={formik.values.transactionType === 'buy'}
 									onChange={handleTransactionTypeChange}
 								/>
-								Kupno
+								Kup
 							</label>
 							<label>
 								<NewRadioInput
@@ -228,54 +276,60 @@ const AddTransactionWindow = prop => {
 									checked={formik.values.transactionType === 'sell'}
 									onChange={handleTransactionTypeChange}
 								/>
-								Sprzedaż
+								Sprzedaj
 							</label>
-						</div>
-						{formik.errors.transactionType && formik.touched.transactionType && (
-							<ErrorMessage>{formik.errors.transactionType}</ErrorMessage>
-						)}
+						</Firstdiv>
+						<Seconddiv>
+							{formik.errors.transactionType && formik.touched.transactionType && (
+								<ErrorMessage>{formik.errors.transactionType}</ErrorMessage>
+							)}
+						</Seconddiv>
 					</OneCell>
 
 					<OneCell>
-						<label htmlFor='currency'>What Currency:</label>
-						<NewSelect name='currency' onChange={handleCurrencyChange} value={formik.values.currency}>
-							<option value='EUR'>EUR</option>
-							<option value='USD'>USD</option>
-							<option value='JPY'>JPY</option>
-							<option value='BGN'>BGN</option>
-							<option value='CZK'>CZK</option>
-							<option value='DKK'>DKK</option>
-							<option value='GBP'>GBP</option>
-							<option value='HUF'>HUF</option>
-							<option value='RON'>RON</option>
-							<option value='SEK'>SEK</option>
-							<option value='CHF'>CHF</option>
-							<option value='ISK'>ISK</option>
-							<option value='NOK'>NOK</option>
-							<option value='HRK'>HRK</option>
-							<option value='RUB'>RUB</option>
-							<option value='TRY'>TRY</option>
-							<option value='AUD'>AUD</option>
-							<option value='BRL'>BRL</option>
-							<option value='CAD'>CAD</option>
-							<option value='CNY'>CNY</option>
-							<option value='HKD'>HKD</option>
-							<option value='IDR'>IDR</option>
-							<option value='ILS'>ILS</option>
-							<option value='INR'>INR</option>
-							<option value='KRW'>KRW</option>
-							<option value='MXN'>MXN</option>
-							<option value='MYR'>MYR</option>
-							<option value='NZD'>NZD</option>
-							<option value='PHP'>PHP</option>
-							<option value='SGD'>SGD</option>
-							<option value='THB'>THB</option>
-							<option value='ZAR'>ZAR</option>
-						</NewSelect>
+						<Firstdiv>
+							<label htmlFor='currency'>What Currency:</label>
+							<NewSelect name='currency' onChange={handleCurrencyChange} value={formik.values.currency}>
+								<option value='EUR'>EUR</option>
+								<option value='USD'>USD</option>
+								<option value='JPY'>JPY</option>
+								<option value='BGN'>BGN</option>
+								<option value='CZK'>CZK</option>
+								<option value='DKK'>DKK</option>
+								<option value='GBP'>GBP</option>
+								<option value='HUF'>HUF</option>
+								<option value='RON'>RON</option>
+								<option value='SEK'>SEK</option>
+								<option value='CHF'>CHF</option>
+								<option value='ISK'>ISK</option>
+								<option value='NOK'>NOK</option>
+								<option value='HRK'>HRK</option>
+								<option value='RUB'>RUB</option>
+								<option value='TRY'>TRY</option>
+								<option value='AUD'>AUD</option>
+								<option value='BRL'>BRL</option>
+								<option value='CAD'>CAD</option>
+								<option value='CNY'>CNY</option>
+								<option value='HKD'>HKD</option>
+								<option value='IDR'>IDR</option>
+								<option value='ILS'>ILS</option>
+								<option value='INR'>INR</option>
+								<option value='KRW'>KRW</option>
+								<option value='MXN'>MXN</option>
+								<option value='MYR'>MYR</option>
+								<option value='NZD'>NZD</option>
+								<option value='PHP'>PHP</option>
+								<option value='SGD'>SGD</option>
+								<option value='THB'>THB</option>
+								<option value='ZAR'>ZAR</option>
+							</NewSelect>
+						</Firstdiv>
 					</OneCell>
 					<OneCell>
-						<NewButton type='submit'>Submit</NewButton>
-						<NewButton onClick={prop.close}>Close</NewButton>
+						<Firstdiv>
+							<NewButton type='submit'>Potwierdź transakcję</NewButton>
+							<NewButton onClick={prop.close}>Zamknij</NewButton>
+						</Firstdiv>
 					</OneCell>
 				</form>
 			</SubWindow>

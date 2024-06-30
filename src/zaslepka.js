@@ -61,7 +61,7 @@ const Zaslepka = prop => {
 		
 			<Window width={windowWidth} height={windowHeight}>
 			<h3>Witaj zagubiony inwestorze!</h3>
-            <TextZaslepka>Oddaję w Twoje ręce aplikację, kóra obliczy za Ciebie efektywność Twoich inwestycji walutowych. Dodając transakcję realizujesz ją po kursie z dnia, w którym nastąpiła transakcja. Rentowność każdej transakcji jest liczona względem dnia dzisiejszego. Czyli na podstawie dzisiejszego kursu. Dzieki aplikacji uzyskasz świadomość rentowności wszystkich transakcji zakupu jak i sprzedaży walut. Masz gląd w łączny bilans Twojego portfela oraz rentowność wszystkich tansakcji. Zapraszam do zabawy.</TextZaslepka>
+            <TextZaslepka>Oddaję w Twoje ręce aplikację, która obliczy za Ciebie efektywność Twoich inwestycji walutowych. Dodając transakcję realizujesz ją po kursie z dnia, w którym nastąpiła transakcja. Rentowność każdej transakcji jest liczona względem dnia dzisiejszego - czyli na podstawie dzisiejszego kursu. Dzięki aplikacji uzyskasz świadomość rentowności wszystkich transakcji zakupu jak i sprzedaży walut. Masz wgląd w łączny bilans Twojego portfela oraz rentowność wszystkich tansakcji. Zapraszam do zabawy.</TextZaslepka>
 			</Window>
 	
 	)

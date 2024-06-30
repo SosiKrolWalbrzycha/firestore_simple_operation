@@ -53,6 +53,7 @@ const AddTransactionButton = styled.button`
 	background-color: black;
 	border: none;
 	border-radius: 5px;
+	cursor: pointer;
 `
 
 const ListDiv = styled.div`
@@ -76,6 +77,7 @@ const DataDiv = styled.div`
 const Buttons = styled.div`
 	display: flex;
 	margin-left: 20px;
+	
 `
 export const MyContext = createContext(null)
 
@@ -201,7 +203,17 @@ const App = () => {
 	
 
 	const showAddTransaction = () => {
-		setIsAddTransactionVisible(true)
+		setIsAddTransactionVisible(true);
+		setIsEditTransactionVisible({
+			isVisible: false,
+			fromCurrency: '',
+			toCurrency: '',
+			transactionType: '',
+			value: 0,
+			data: null,
+			orderId: '',
+			transactionID: '',});
+		window.scrollTo({ top: 0, behavior: 'smooth' });
 	}
 	const hideAddTransaction = () => {
 		setIsAddTransactionVisible(false)
@@ -225,8 +237,9 @@ const App = () => {
 			orderId: orderId,
 			transactionID: transactionId,
 			transactionPrice: transactonPrice,
-		})
-		console.log(orderId);
+		});
+		setIsAddTransactionVisible(false)
+
 	}
 	const hideEditTransaction = () => {
 		setIsEditTransactionVisible({
@@ -252,8 +265,8 @@ const App = () => {
 				<Header src={Logo} alt="Logo"></Header>
 				{isAddTransactionVisible && <AddTransactionWindow close={hideAddTransaction} />}
 				{isEditTransactionVisible.isVisible && <EditTransactionWindow updateTransactionType={updateTransactionType} close={hideEditTransaction} />}
-				{!isAddTransactionVisible && (ordersState.items[0] ? <Chart data={chart1Data()} /> : <Zaslepka />)}
-				{!isAddTransactionVisible &&<AddTransactionButton onClick={showAddTransaction}>Dodaj transakcję</AddTransactionButton>}
+				{!(isAddTransactionVisible || isEditTransactionVisible.isVisible) && (ordersState.items[0] ? <Chart data={chart1Data()} /> : <Zaslepka />)}
+				{!(isAddTransactionVisible || isEditTransactionVisible.isVisible) &&<AddTransactionButton onClick={showAddTransaction}>Dodaj transakcję</AddTransactionButton>}
 				{transactionsState.loading && <p>Ładowanie...</p>}
 				{ordersState.error && <p>Wystąpił błąd: {ordersState.error.message}</p>}
 				{ordersState.items[0] &&

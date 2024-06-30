@@ -58,10 +58,10 @@ const Chart = ({ data }) => {
 		return (
 			<StyledList>
 				 <li style={{ color: '#FF8383', padding:"0px 100px 20px 30px" }}>
-					Obciążenie Twojego konta w PLN
+					Zakup walut - obciążenie Twojego konta w PLN
 				</li>
 				<li style={{ color: '#86FF8A' }}>
-					Transakcje sprzedaży walut - uznanie na Twoim koncie w PLN
+					Sprzedaż walut - uznanie na Twoim koncie w PLN
 				</li>
 			</StyledList>
 		);

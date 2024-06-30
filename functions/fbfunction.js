@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable linebreak-style */
 const fetch = require("node-fetch");
 const admin = require("firebase-admin");

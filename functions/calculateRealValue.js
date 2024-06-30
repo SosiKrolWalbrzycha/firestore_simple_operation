@@ -33,6 +33,7 @@ exports.calculateRealValue = functions.firestore
             });
 
         // Kontynuuj obliczenia z nowo pobraną ceną
+        // eslint-disable-next-line no-undef
         const realPrice = Number(value) * rate;
 
         // Zapisz w kolekcji realvalue

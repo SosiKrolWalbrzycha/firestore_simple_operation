@@ -1,4 +1,4 @@
-import React, { useContext, useMemo } from 'react'
+import React, { useContext, useMemo, useState, useEffect } from 'react'
 import styled from 'styled-components'
 import { MyContext } from './App'
 import Arrow from './square-arrow-right.svg';
@@ -74,189 +74,182 @@ flex-wrap: wrap;
 `
 
 const AppPanel = prop => {
-	const { ordersState, transactionsState, setCurrencyFilter, dailyExchangeRatesState, setTransactionFilter } = useContext(MyContext)
-
+	const { ordersState, transactionsState, setCurrencyFilter, dailyExchangeRatesState, setTransactionFilter } = useContext(MyContext);
+	const [isDataLoaded, setIsDataLoaded] = useState(false);
+  
+	// Ustawienie isDataLoaded na true, gdy wszystkie dane są załadowane
+	useEffect(() => {
+		const areOrdersLoaded = ordersState?.items && ordersState.items.length > 0;
+		const areTransactionsLoaded = transactionsState?.items && transactionsState.items.length > 0;
+		const areRatesLoaded = dailyExchangeRatesState?.items && dailyExchangeRatesState.items.length > 0;
+	
+		console.log('areOrdersLoaded:', areOrdersLoaded);
+		console.log('areTransactionsLoaded:', areTransactionsLoaded);
+		console.log('areRatesLoaded:', areRatesLoaded);
+	
+		if (areOrdersLoaded && areTransactionsLoaded && areRatesLoaded) {
+		  setIsDataLoaded(true);
+		}
+	  }, [ordersState.items, transactionsState.items, dailyExchangeRatesState.items]);
+  
 	// Zbieranie unikalnych walut
 	const currencies = useMemo(() => {
-		const uniqueCurrencies = new Set()
-		ordersState.items.forEach(item => {
-			if (item.toCurrency) uniqueCurrencies.add(item.toCurrency)
-			if (item.fromCurrency) uniqueCurrencies.add(item.fromCurrency)
-		})
-		return Array.from(uniqueCurrencies)
-	}, [ordersState.items])
-
+	  if (!isDataLoaded) {
+		return [];
+	  }
+	  const uniqueCurrencies = new Set();
+	  ordersState.items.forEach(item => {
+		if (item.toCurrency) uniqueCurrencies.add(item.toCurrency);
+		if (item.fromCurrency) uniqueCurrencies.add(item.fromCurrency);
+	  });
+	  return Array.from(uniqueCurrencies);
+	}, [isDataLoaded, ordersState.items]);
+  
 	// Sumowanie wydatków w PLNach - zakupów walut
-
 	const totalBuyAmount = useMemo(() => {
-		return ordersState.items.reduce((total, item) => {
-			if (item.transactionType === 'buy') {
-				return total + Number(item.value)
-			}
-			return total
-		}, 0)
-	}, [ordersState.items])
-
+	  if (!isDataLoaded) {
+		return 0;
+	  }
+	  return ordersState.items.reduce((total, item) => {
+		if (item.transactionType === 'buy') {
+		  return total + Number(item.value);
+		}
+		return total;
+	  }, 0);
+	}, [isDataLoaded, ordersState.items]);
+  
 	// Sumowanie sprzedaży walut
-
-	// Pierwej Filtrowanie orders, które mają transactionType 'sell'
-
 	const sellOrdersIds = useMemo(() => {
-		return ordersState.items.filter(order => order.transactionType === 'sell').map(order => order.id) // Zbieranie tylko ID
-	}, [ordersState.items])
-
-	// Teraz sumujemy transakcje zwierające pobrane w wczesniejszej funkcji dane
+	  if (!isDataLoaded) {
+		return [];
+	  }
+	  return ordersState.items.filter(order => order.transactionType === 'sell').map(order => order.id);
+	}, [isDataLoaded, ordersState.items]);
+  
 	const totalSellAmount = useMemo(() => {
-		return transactionsState.items.reduce((total, transaction) => {
-			if (sellOrdersIds.includes(transaction.operationId)) {
-				return total + Number(transaction.price)
-			}
-			return total
-		}, 0)
-	}, [transactionsState.items, sellOrdersIds])
-
-	// Sumowanie ilości waluty
-
+	  if (!isDataLoaded) {
+		return 0;
+	  }
+	  return transactionsState.items.reduce((total, transaction) => {
+		if (sellOrdersIds.includes(transaction.operationId)) {
+		  return total + Number(transaction.price);
+		}
+		return total;
+	  }, 0);
+	}, [isDataLoaded, transactionsState.items, sellOrdersIds]);
+  
 	const currencySums = useMemo(() => {
-		const sums = {}
-
-		ordersState.items.forEach(item => {
-			const currency = item.currency
-			if (!sums[currency]) sums[currency] = { buy: 0, sell: 0 }
-
-			if (item.transactionType === 'sell') {
-				sums[currency].sell += Number(item.value)
-			} else if (item.transactionType === 'buy') {
-				const transaction = transactionsState.items.find(t => t.operationId === item.id)
-				if (transaction) sums[currency].buy += Number(transaction.price)
-			}
-		})
-
-		return sums
-	}, [ordersState.items, transactionsState.items])
-
-	console.log(ordersState);
-
-	// Sumowanie dzisiejszej wartości posiadanych/kupionych walut
-
+	  if (!isDataLoaded) {
+		return {};
+	  }
+	  const sums = {};
+	  ordersState.items.forEach(item => {
+		const currency = item.currency;
+		if (!sums[currency]) sums[currency] = { buy: 0, sell: 0 };
+		if (item.transactionType === 'sell') {
+		  sums[currency].sell += Number(item.value);
+		} else if (item.transactionType === 'buy') {
+		  const transaction = transactionsState.items.find(t => t.operationId === item.id);
+		  if (transaction) sums[currency].buy += Number(transaction.price);
+		}
+	  });
+	  return sums;
+	}, [isDataLoaded, ordersState.items, transactionsState.items]);
+  
 	const calculateTodayValue = useMemo(() => {
-		const buyOrders = ordersState.items.filter(order => order.transactionType === 'buy')
-
-		if (buyOrders.length === 0) {
-			console.log('Nie zrobiłeś tansakcji zakupu walut.')
-			return 0
+	  if (!isDataLoaded) {
+		return 0;
+	  }
+	  const buyOrders = ordersState.items.filter(order => order.transactionType === 'buy');
+	  if (buyOrders.length === 0) {
+		console.log('Nie zrobiłeś transakcji zakupu walut.');
+		return 0;
+	  }
+	  const buyOrderIds = buyOrders.map(order => order.id);
+	  const buyTransactions = transactionsState.items.filter(transaction => buyOrderIds.includes(transaction.operationId));
+	  if (buyTransactions.length === 0) {
+		console.log('Nie ma transakcji odpowiadających id ordersów.');
+		return 0;
+	  }
+	  const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+	  const todayRatesDoc = dailyExchangeRatesState.items.find(rateDoc => rateDoc.date === today);
+	  if (!todayRatesDoc) {
+		console.log('Nie mamy kursów walut na dzień dzisiejszy');
+		return 0;
+	  }
+	  const dailyRates = todayRatesDoc.rate;
+	  let totalValue = 0;
+	  buyTransactions.forEach(transaction => {
+		const rate = dailyRates[transaction.toCurrency];
+		if (rate) {
+		  totalValue += transaction.price / rate;
 		}
-
-		const buyOrderIds = buyOrders.map(order => order.id)
-
-		const buyTransactions = transactionsState.items.filter(transaction => buyOrderIds.includes(transaction.operationId))
-
-		if (buyTransactions.length === 0) {
-			console.log('Nie ma transakcji odpowiadających id ordersów.')
-			return 0
-		}
-
-		const today = new Date().toISOString().split('T')[0] // YYYY-MM-DD
-
-		const todayRatesDoc = dailyExchangeRatesState.items.find(rateDoc => rateDoc.date === today)
-
-		if (!todayRatesDoc) {
-			console.log('Nie mamy kursów walut na dzień dzisiejszy')
-			return 0
-		}
-
-		const dailyRates = todayRatesDoc.rate
-
-		let totalValue = 0
-		buyTransactions.forEach(transaction => {
-			const rate = dailyRates[transaction.toCurrency]
-			if (rate) {
-				totalValue += transaction.price / rate
-			}
-		})
-		return totalValue
-	}, [ordersState.items, transactionsState.items])
-
-	// Sumowanie wartości zobowiązań związanych ze sprzedaniem walut których nie miales
-
-	// Sumowanie dzisiejszej wartości posiadanych/kupionych walut
-
+	  });
+	  return totalValue;
+	}, [isDataLoaded, ordersState.items, transactionsState.items, dailyExchangeRatesState.items]);
+  
 	const calculateTodayLiabilities = useMemo(() => {
-		const sellOrders = ordersState.items.filter(order => order.transactionType === 'sell')
-
-		if (sellOrders.length === 0) {
-			console.log('Nie zrobiłeś tansakcji sprzedazy walut.')
-			return 0
+	  if (!isDataLoaded) {
+		return 0;
+	  }
+	  const sellOrders = ordersState.items.filter(order => order.transactionType === 'sell');
+	  if (sellOrders.length === 0) {
+		console.log('Nie zrobiłeś transakcji sprzedaży walut.');
+		return 0;
+	  }
+	  const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+	  const todayRatesDoc = dailyExchangeRatesState.items.find(rateDoc => rateDoc.date === today);
+	  if (!todayRatesDoc) {
+		console.log('Nie mamy kursów walut na dzień dzisiejszy');
+		return 0;
+	  }
+	  const dailyRates = todayRatesDoc.rate;
+	  let totalLiabilities = 0;
+	  sellOrders.forEach(order => {
+		const rate = dailyRates[order.fromCurrency];
+		if (rate) {
+		  totalLiabilities += order.value / rate;
 		}
-
-		const today = new Date().toISOString().split('T')[0] // YYYY-MM-DD
-
-		const todayRatesDoc = dailyExchangeRatesState.items.find(rateDoc => rateDoc.date === today)
-
-		if (!todayRatesDoc) {
-			console.log('Nie mamy kursów walut na dzień dzisiejszy')
-			return 0
-		}
-
-		const dailyRates = todayRatesDoc.rate
-
-		let totalLaibilities = 0
-		sellOrders.forEach(order => {
-			const rate = dailyRates[order.fromCurrency]
-			if (rate) {
-				totalLaibilities += order.value / rate
-			}
-		})
-		return totalLaibilities
-	}, [ordersState.items, transactionsState.items])
-
-	const totalProfitFromBuy = (calculateTodayValue - totalBuyAmount).toFixed(2)
-
-	const totalProfitFromSell = (totalSellAmount - calculateTodayLiabilities).toFixed(2)
-
-	const totalProfitability = (parseFloat(totalProfitFromBuy) + parseFloat(totalProfitFromSell)).toFixed(2)
-
+	  });
+	  return totalLiabilities;
+	}, [isDataLoaded, ordersState.items, transactionsState.items, dailyExchangeRatesState.items]);
+  
+	const totalProfitFromBuy = (calculateTodayValue - totalBuyAmount).toFixed(2);
+	const totalProfitFromSell = (totalSellAmount - calculateTodayLiabilities).toFixed(2);
+	const totalProfitability = (parseFloat(totalProfitFromBuy) + parseFloat(totalProfitFromSell)).toFixed(2);
+  
+	if (!isDataLoaded) {
+	  return <div>Ładowanie danych...</div>;
+	}
+  
 	return (
-		<MainPanelBody>
-      <h2>Twój wynik na dzisiaj:</h2>
-			<LeftRight>
-        
-      <CurrencyButton2 bgc={totalProfitability} > 
-<div><p>Twój zysk:</p>
-<p>{totalProfitability}</p></div>
-
-      </CurrencyButton2>
-				<CurrencyButton1 bgc={totalProfitFromBuy} onClick={() => setTransactionFilter('buy')}>
-          <div>
-					<p>Kupiłeś waluty za: </p>
-					<p>{totalBuyAmount.toFixed(2)} PLN</p></div>
-          <ArrowImg src={Arrow} alt="Arrow Icon" />
-          <div>
-					<p>Zysk na kupionych: </p>
-					<p>{totalProfitFromBuy} PLN</p></div>
-				</CurrencyButton1>
-				<CurrencyButton1 bgc={totalProfitFromSell} onClick={() => setTransactionFilter('sell')}>
-          <div>
-					<p>Sprzedałeś walut za:</p>
-					<p>{totalSellAmount.toFixed(2)} PLN</p></div>
-          <ArrowImg src={Arrow} alt="Arrow Icon" /><div>
-					<p>Zysk na sprzedanych: </p>
-					<p>{totalProfitFromSell} PLN</p></div>
-				</CurrencyButton1>
-			</LeftRight>
-      <div>
-      <h2>Twój portfel walutowy:</h2>
-
-			{Object.entries(currencySums).map(([currency, { buy, sell }]) => (
-				<CurrencyButton key={currency} onClick={() => setCurrencyFilter(currency)} bgc={(buy - sell).toFixed(2)}>
-					{currency} - Bilans: {(buy - sell).toFixed(2)}
-				</CurrencyButton>
-			))}
-
-      </div>
-
-		</MainPanelBody>
-	)
-}
-
-export default AppPanel
+	  <MainPanelBody>
+		<h2>Twój wynik na dzisiaj:</h2>
+		<LeftRight>
+		  <CurrencyButton2 bgc={totalProfitability}>
+			<div><p>Twój zysk:</p><p>{totalProfitability}</p></div>
+		  </CurrencyButton2>
+		  <CurrencyButton1 bgc={totalProfitFromBuy} onClick={() => setTransactionFilter('buy')}>
+			<div><p>Kupiłeś waluty za: </p><p>{totalBuyAmount.toFixed(2)} PLN</p></div>
+			<ArrowImg src={Arrow} alt="Arrow Icon" />
+			<div><p>Zysk na kupionych: </p><p>{totalProfitFromBuy} PLN</p></div>
+		  </CurrencyButton1>
+		  <CurrencyButton1 bgc={totalProfitFromSell} onClick={() => setTransactionFilter('sell')}>
+			<div><p>Sprzedałeś walut za:</p><p>{totalSellAmount.toFixed(2)} PLN</p></div>
+			<ArrowImg src={Arrow} alt="Arrow Icon" />
+			<div><p>Zysk na sprzedanych: </p><p>{totalProfitFromSell} PLN</p></div>
+		  </CurrencyButton1>
+		</LeftRight>
+		<div>
+		  <h2>Twój portfel walutowy:</h2>
+		  {Object.entries(currencySums).map(([currency, { buy, sell }]) => (
+			<CurrencyButton key={currency} onClick={() => setCurrencyFilter(currency)} bgc={(buy - sell).toFixed(2)}>
+			  {currency} - Bilans: {(buy - sell).toFixed(2)}
+			</CurrencyButton>
+		  ))}
+		</div>
+	  </MainPanelBody>
+	);
+  };
+  
+  export default AppPanel;
